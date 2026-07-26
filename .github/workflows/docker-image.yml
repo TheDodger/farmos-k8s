@@ -52,10 +52,15 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     # Only run for tag creation, published releases, or explicit dispatches —
     # skip branch creates (e.g. Renovate branches) to avoid invalid Docker tag
     # errors.
@@ -93,44 +98,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version tag
-        id: extract_version
-        env:
-          DISPATCH_TAG: ${{ inputs.tag }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: |
-          if [ -n "${DISPATCH_TAG}" ]; then
-            TAG="${DISPATCH_TAG}"
-          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          elif [ -n "${RELEASE_TAG}" ]; then
-            TAG="${RELEASE_TAG}"
-          else
-            echo "Unable to determine tag — aborting." >&2
-            exit 1
-          fi
-
-          # Validate that TAG is safe to use as a Docker image tag.
-          if [ "${#TAG}" -gt 128 ]; then
-            echo "Invalid Docker tag '${TAG}': must be 128 characters or fewer." >&2
-            exit 1
-          fi
-          if [[ "${TAG}" == *"/"* ]]; then
-            echo "Invalid Docker tag '${TAG}': must not contain '/'." >&2
-            exit 1
-          fi
-          if ! [[ "${TAG}" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]*$ ]]; then
-            echo "Invalid Docker tag '${TAG}': must start with a letter, digit, or '_', and contain only letters, digits, '_', '.', or '-'." >&2
-            exit 1
-          fi
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          tags: |
-            TheDodger/farmos-k8s:latest
-            TheDodger/farmos-k8s:${{ steps.extract_version.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
