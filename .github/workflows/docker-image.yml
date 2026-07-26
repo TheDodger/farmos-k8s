@@ -49,6 +49,10 @@ on:
         required: true
         type: string
 
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -85,8 +89,9 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract version tag
         id: extract_version
@@ -127,5 +132,5 @@ jobs:
           context: .
           push: true
           tags: |
-            jorblad/farmos-k8s:latest
-            jorblad/farmos-k8s:${{ steps.extract_version.outputs.tag }}
+            TheDodger/farmos-k8s:latest
+            TheDodger/farmos-k8s:${{ steps.extract_version.outputs.tag }}

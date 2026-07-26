@@ -1,4 +1,4 @@
-[![Build and Push Docker Image](https://github.com/jorblad/farmos-k8s/actions/workflows/docker-image.yml/badge.svg)](https://github.com/jorblad/farmos-k8s/actions/workflows/docker-image.yml)
+[![Build and Push Docker Image](https://github.com/TheDodger/farmos-k8s/actions/workflows/docker-image.yml/badge.svg)](https://github.com/TheDodger/farmos-k8s/actions/workflows/docker-image.yml)
 
 # farmos-k8s
 
@@ -11,8 +11,6 @@ The following modules are included in this setup:
 - `farm_ledger`
 - `farmos_asset_link`
 - `gin_login`
-- `farm_organic`
-- `farm_map_custom_layers`
 - `farm_crop_plan`
 - `oauth_login_oauth2`
 

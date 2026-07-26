@@ -5,9 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'project/composer.json'
-      - 'Dockerfile'
-      
+      - "project/composer.json"
+      - "Dockerfile"
 
 permissions:
   contents: write
