@@ -1,3 +1,5 @@
+LABEL org.opencontainers.image.source=https://github.com/TheDodger/farmos-k8s
+
 # Inherit from the upsteam farmOS 3.x image.
 # Upgrade here for new farmos version
 FROM farmos/farmos:4.0.4
